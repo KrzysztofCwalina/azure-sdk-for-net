@@ -1,0 +1,30 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Azure.Office", "src\Azure.Office.csproj", "{1BEEFBC6-2555-4D6D-825C-5AF5073BDD93}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Azure.Office.Tests", "tests\Azure.Office.Tests.csproj", "{283B4986-039E-46B8-82B7-2945E55B35DE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1BEEFBC6-2555-4D6D-825C-5AF5073BDD93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BEEFBC6-2555-4D6D-825C-5AF5073BDD93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BEEFBC6-2555-4D6D-825C-5AF5073BDD93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BEEFBC6-2555-4D6D-825C-5AF5073BDD93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{283B4986-039E-46B8-82B7-2945E55B35DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{283B4986-039E-46B8-82B7-2945E55B35DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{283B4986-039E-46B8-82B7-2945E55B35DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{283B4986-039E-46B8-82B7-2945E55B35DE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F99E1793-076D-4060-A0BD-71ED8FA9050D}
+	EndGlobalSection
+EndGlobal

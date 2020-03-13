@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
+using Azure.Core;
 using Azure.Core.Pipeline;
 
 namespace Azure.Core.Testing
@@ -75,7 +76,7 @@ namespace Azure.Core.Testing
             {
                 if (property.ValueKind == JsonValueKind.Object)
                 {
-                    var arrayBufferWriter = new ArrayBufferWriter<byte>();
+                    var arrayBufferWriter = new Azure.Core.ArrayBufferWriter<byte>();
                     using var writer = new Utf8JsonWriter(arrayBufferWriter);
                     property.WriteTo(writer);
                     writer.Flush();
