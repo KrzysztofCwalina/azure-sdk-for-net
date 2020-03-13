@@ -7,9 +7,8 @@ using Azure.Identity;
 using Azure.Office.Mail;
 using Azure.Office.Users;
 using System;
-using System.Text.Json;
+using System.ComponentModel;
 using System.Threading;
-using id = Azure.Identity;
 
 namespace Azure.Office
 {
@@ -77,5 +76,26 @@ namespace Azure.Office
             AccessToken t = credential.GetToken(ctx, cancellationToken);
             request.Headers.Add(HttpHeader.Names.Authorization, "Bearer " + t.Token);
         }
+
+        #region nobody wants to see these
+        /// <summary>
+        /// Check if two ConfigurationSetting instances are equal.
+        /// </summary>
+        /// <param name="obj">The instance to compare to.</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override bool Equals(object obj) => base.Equals(obj);
+
+        /// <summary>
+        /// Get a hash code for the ConfigurationSetting.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override int GetHashCode() => base.GetHashCode();
+
+        /// <summary>
+        /// Creates a Key Value string in reference to the ConfigurationSetting.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override string ToString() => base.ToString();
+        #endregion
     }
 }

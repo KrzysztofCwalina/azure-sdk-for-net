@@ -20,12 +20,24 @@ namespace Azure.Office.Tests
         public void GetMe()
         {
             OfficeUser user = _client.GetMe();
+
+            Assert.AreEqual("Cwalina", user.Surname);
         }
 
         [Test]
         public void GetUser()
         {
             OfficeUser user = _client.GetUser("pmarcu@microsoft.com");
+
+            Assert.AreEqual("Marcu", user.Surname);
+        }
+
+        [Test]
+        public void GetPhoto()
+        {
+            using Response photo = _client.GetPhoto();
+
+            Assert.AreEqual("image/jpeg", photo.Headers.ContentType);
         }
     }
 }

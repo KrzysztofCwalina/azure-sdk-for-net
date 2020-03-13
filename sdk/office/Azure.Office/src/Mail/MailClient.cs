@@ -5,9 +5,9 @@ using Azure.Core;
 using Azure.Core.Pipeline;
 using Azure.Identity;
 using System;
+using System.ComponentModel;
 using System.Text.Json;
 using System.Threading;
-using id = Azure.Identity;
 
 namespace Azure.Office.Mail
 {
@@ -73,7 +73,7 @@ namespace Azure.Office.Mail
 
             try
             {
-                var request = _pipeline.CreateRequest();
+                using Request request = _pipeline.CreateRequest();
                 request.Method = RequestMethod.Post;
                 var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/me/sendMail");
                 request.Uri.Reset(new Uri(escaped));
@@ -118,5 +118,26 @@ namespace Azure.Office.Mail
                 throw;
             }
         }
+
+        #region nobody wants to see these
+        /// <summary>
+        /// Check if two ConfigurationSetting instances are equal.
+        /// </summary>
+        /// <param name="obj">The instance to compare to.</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override bool Equals(object obj) => base.Equals(obj);
+
+        /// <summary>
+        /// Get a hash code for the ConfigurationSetting.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override int GetHashCode() => base.GetHashCode();
+
+        /// <summary>
+        /// Creates a Key Value string in reference to the ConfigurationSetting.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override string ToString() => base.ToString();
+        #endregion
     }
 }
