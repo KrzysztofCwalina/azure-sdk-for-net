@@ -10,6 +10,8 @@ namespace Azure.Office.Tests
     {
         private UserClient _client;
 
+        private const string USER = "pmarcu@microsoft.com";
+
         [SetUp]
         public void Setup()
         {
@@ -27,15 +29,23 @@ namespace Azure.Office.Tests
         [Test]
         public void GetUser()
         {
-            OfficeUser user = _client.GetUser("pmarcu@microsoft.com");
+            OfficeUser user = _client.GetUser(USER);
 
             Assert.AreEqual("Marcu", user.Surname);
         }
 
         [Test]
-        public void GetPhoto()
+        public void GetPhotoMe()
         {
             using Response photo = _client.GetPhoto();
+
+            Assert.AreEqual("image/jpeg", photo.Headers.ContentType);
+        }
+
+        [Test]
+        public void GetPhotoUser()
+        {
+            using Response photo = _client.GetPhoto(USER);
 
             Assert.AreEqual("image/jpeg", photo.Headers.ContentType);
         }

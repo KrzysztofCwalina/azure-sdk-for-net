@@ -171,6 +171,46 @@ namespace Azure.Office.Users
             }
         }
 
+        /// <summary>
+        /// Gets photo of a user.
+        /// </summary>
+        /// <param name="principalOrId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Response GetPhoto(string principalOrId, CancellationToken cancellationToken = default)
+        {
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(UserClient)}.{nameof(GetPhoto)}");
+            scope.Start();
+
+            try
+            {
+                using Request request = _pipeline.CreateRequest();
+                request.Method = RequestMethod.Get;
+
+                var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/users/");
+                request.Uri.Reset(new Uri(escaped));
+                request.Uri.AppendPath(principalOrId, escape: true);
+                request.Uri.AppendPath("/photo/$value");
+
+                OfficeClient.AddAuthHeader(_credential, request, cancellationToken);
+
+                var response = _pipeline.SendRequest(request, cancellationToken);
+
+                switch (response.Status)
+                {
+                    case 200:
+                        return response;
+                    default:
+                        throw _clientDiagnostics.CreateRequestFailedException(response);
+                }
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
         #region nobody wants to see these
         /// <summary>
         /// Check if two ConfigurationSetting instances are equal.
