@@ -78,15 +78,53 @@ namespace Azure.Office.Users
 
                 var response = _pipeline.SendRequest(request, cancellationToken);
 
-                var json = JsonDocument.Parse(response.ContentStream);
-                var root = json.RootElement;
+                switch (response.Status)
+                {
+                    case 200:
+                        OfficeUser user = OfficeUser.Deserialize(response.ContentStream);
+                        return Response.FromValue(user, response);
+                    default:
+                        throw _clientDiagnostics.CreateRequestFailedException(response);
+                }
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
 
-                var user = new OfficeUser();
-                user.Office = root.GetProperty("officeLocation").GetString();
-                user.DisplayName = root.GetProperty("displayName").GetString();
-                user.Title = root.GetProperty("jobTitle").GetString();
+        /// <summary>
+        /// Gets information about current graph user
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <param name="principalOrId">User principal name or use ID</param>
+        /// <returns></returns>
+        public Response<OfficeUser> GetUser(string principalOrId, CancellationToken cancellationToken = default)
+        {
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(UserClient)}.{nameof(GetMe)}");
+            scope.Start();
 
-                return Response.FromValue(user, response);
+            try
+            {
+                var request = _pipeline.CreateRequest();
+                request.Method = RequestMethod.Get;
+                var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/users/");
+                request.Uri.Reset(new Uri(escaped));
+                request.Uri.AppendPath(principalOrId, escape: true);
+                OfficeClient.AddAuthHeader(_credential, request, cancellationToken);
+
+                var response = _pipeline.SendRequest(request, cancellationToken);
+
+                switch (response.Status)
+                {
+                    case 200:
+                        OfficeUser user = OfficeUser.Deserialize(response.ContentStream);
+                        return Response.FromValue(user, response);
+                    default:
+                        throw _clientDiagnostics.CreateRequestFailedException(response);
+                }
+
             }
             catch (Exception e)
             {

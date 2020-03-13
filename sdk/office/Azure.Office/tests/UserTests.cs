@@ -8,16 +8,24 @@ namespace Azure.Office.Tests
 {
     public class UserTests
     {
+        private UserClient _client;
+
         [SetUp]
         public void Setup()
         {
+            _client = new UserClient("kcwalina@microsoft.com");
         }
 
         [Test]
         public void GetMe()
         {
-            var client = new UserClient("kcwalina@microsoft.com");
-            OfficeUser user = client.GetMe();
+            OfficeUser user = _client.GetMe();
+        }
+
+        [Test]
+        public void GetUser()
+        {
+            OfficeUser user = _client.GetUser("pmarcu@microsoft.com");
         }
     }
 }
