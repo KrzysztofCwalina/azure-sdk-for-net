@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Text;
 using System.Text.Json;
+
+// TODO: implement full schema: https://docs.microsoft.com/en-us/graph/api/resources/message?view=graph-rest-1.0
 
 namespace Azure.Office.Mail
 {
@@ -69,5 +70,26 @@ namespace Azure.Office.Mail
             writer.WriteEndObject(); // root
             writer.Flush();
         }
+
+        #region nobody wants to see these
+        /// <summary>
+        /// Check if two ConfigurationSetting instances are equal.
+        /// </summary>
+        /// <param name="obj">The instance to compare to.</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override bool Equals(object obj) => base.Equals(obj);
+
+        /// <summary>
+        /// Get a hash code for the ConfigurationSetting.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override int GetHashCode() => base.GetHashCode();
+
+        /// <summary>
+        /// Creates a Key Value string in reference to the ConfigurationSetting.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override string ToString() => Subject;
+        #endregion
     }
 }

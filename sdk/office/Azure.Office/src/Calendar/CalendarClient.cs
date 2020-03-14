@@ -9,12 +9,12 @@ using System.ComponentModel;
 using System.Text.Json;
 using System.Threading;
 
-namespace Azure.Office.Mail
+namespace Azure.Office.Calendar
 {
     /// <summary>
-    /// Main type for e-mail.
+    /// Main type for accessing calendar
     /// </summary>
-    public class MailClient
+    public class CalendarClient
     {
         private readonly DefaultAzureCredential _credential;
         private readonly HttpPipeline _pipeline;
@@ -24,7 +24,7 @@ namespace Azure.Office.Mail
         /// Creates MailClient.
         /// </summary>
         /// <param name="username">Graph user</param>
-        public MailClient(string username) : this(username, new OfficeClientOptions())
+        public CalendarClient(string username) : this(username, new OfficeClientOptions())
         {
         }
 
@@ -33,7 +33,7 @@ namespace Azure.Office.Mail
         /// </summary>
         /// <param name="username">Graph user</param>
         /// <param name="options">Client options</param>
-        public MailClient(string username, OfficeClientOptions options)
+        public CalendarClient(string username, OfficeClientOptions options)
         {
             Argument.AssertNotNull(username, nameof(username));
             Argument.AssertNotNull(options, nameof(options));
@@ -46,7 +46,40 @@ namespace Azure.Office.Mail
             _clientDiagnostics = new ClientDiagnostics(options);
         }
 
-        internal MailClient(HttpPipeline pipeline, DefaultAzureCredential credential, ClientDiagnostics clientDiagnostics)
+        /// <summary>
+        /// Gets list of events.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Pageable<CalendarEvent> GetEvents(CancellationToken cancellationToken = default)
+        {
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(CalendarClient)}.{nameof(GetEvents)}");
+            scope.Start();
+
+            try
+            {
+                using Request request = _pipeline.CreateRequest();
+                request.Method = RequestMethod.Get;
+                var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/me/events");
+                request.Uri.Reset(new Uri(escaped));
+                OfficeClient.AddAuthHeader(_credential, request, cancellationToken);
+
+                var response = _pipeline.SendRequest(request, CancellationToken.None);
+
+                var json = JsonDocument.Parse(response.ContentStream);
+                var root = json.RootElement;
+
+                throw new NotImplementedException(); // TODO: implement
+                //return response;
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        internal CalendarClient(HttpPipeline pipeline, DefaultAzureCredential credential, ClientDiagnostics clientDiagnostics)
         {
             _credential = credential;
             _pipeline = pipeline;
@@ -56,48 +89,7 @@ namespace Azure.Office.Mail
         /// <summary>
         /// Constructor for mocking
         /// </summary>
-        protected MailClient() { }
-
-        /// <summary>
-        /// Sends e-mail
-        /// </summary>
-        /// <param name="message">Message</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public Response Send(MailMessage message, CancellationToken cancellationToken = default)
-        {
-            using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(MailClient)}.{nameof(Send)}");
-            scope.Start();
-
-            try
-            {
-                using Request request = _pipeline.CreateRequest();
-                request.Method = RequestMethod.Post;
-                var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/me/sendMail");
-                request.Uri.Reset(new Uri(escaped));
-                request.Headers.Add(HttpHeader.Common.JsonContentType);
-                OfficeClient.AddAuthHeader(_credential, request, cancellationToken);
-
-                var writer = new Core.ArrayBufferWriter<byte>();
-                var jsonWriter = new Utf8JsonWriter(writer);
-                message.Serialize(jsonWriter);
-                var jsonBytes = writer.WrittenMemory;
-
-                request.Content = RequestContent.Create(jsonBytes);
-
-                var response = _pipeline.SendRequest(request, CancellationToken.None);
-
-                var json = JsonDocument.Parse(response.ContentStream);
-                var root = json.RootElement;
-
-                return response;
-            }
-            catch (Exception e)
-            {
-                scope.Failed(e);
-                throw;
-            }
-        }
+        protected CalendarClient() { }
 
         #region nobody wants to see these
         /// <summary>

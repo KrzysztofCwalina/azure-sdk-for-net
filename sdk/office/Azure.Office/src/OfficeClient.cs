@@ -4,6 +4,7 @@
 using Azure.Core;
 using Azure.Core.Pipeline;
 using Azure.Identity;
+using Azure.Office.Calendar;
 using Azure.Office.Mail;
 using Azure.Office.Users;
 using System;
@@ -68,6 +69,15 @@ namespace Azure.Office
         public MailClient GetMailClient()
         {
             return new MailClient(_pipeline, _credential, _clientDiagnostics);
+        }
+
+        /// <summary>
+        /// Creates CalendarClient.
+        /// </summary>
+        /// <returns></returns>
+        public CalendarClient GetCalendarClient()
+        {
+            return new CalendarClient(_pipeline, _credential, _clientDiagnostics);
         }
 
         internal static void AddAuthHeader(DefaultAzureCredential credential, Request request, CancellationToken cancellationToken)

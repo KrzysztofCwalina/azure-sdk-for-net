@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using Azure.Office.Calendar;
 using Azure.Office.Mail;
 using Azure.Office.Users;
 using NUnit.Framework;
@@ -25,6 +26,9 @@ namespace Azure.Office.Tests
 
             UserClient user = _client.GetUserClient();
             Assert.IsNotNull(user);
+
+            CalendarClient calendar = _client.GetCalendarClient();
+            Assert.IsNotNull(calendar);
         }
     }
 }
