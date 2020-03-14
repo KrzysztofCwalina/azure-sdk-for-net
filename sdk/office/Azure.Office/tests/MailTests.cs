@@ -19,7 +19,11 @@ namespace Azure.Office.Tests
         [Test]
         public void SendEmail()
         {
-            Response response = _client.Send("test", "Hello World!", "kcwalina@microsoft.com");
+            var message = new MailMessage();
+            message.Subject = "Hello my friends!";
+            message.To.Add("kcwalina@microsoft.com");
+
+            Response response = _client.Send(message);
         }
     }
 }

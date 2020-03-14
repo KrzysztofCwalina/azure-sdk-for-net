@@ -61,12 +61,10 @@ namespace Azure.Office.Mail
         /// <summary>
         /// Sends e-mail
         /// </summary>
-        /// <param name="subject">Subject</param>
         /// <param name="message">Message</param>
-        /// <param name="to"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Response Send(string subject, string message, string to, CancellationToken cancellationToken = default)
+        public Response Send(MailMessage message, CancellationToken cancellationToken = default)
         {
             using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(MailClient)}.{nameof(Send)}");
             scope.Start();
@@ -82,25 +80,7 @@ namespace Azure.Office.Mail
 
                 var writer = new Core.ArrayBufferWriter<byte>();
                 var jsonWriter = new Utf8JsonWriter(writer);
-                jsonWriter.WriteStartObject();
-                jsonWriter.WriteStartObject("message");
-                jsonWriter.WriteString("subject", subject);
-                jsonWriter.WriteStartObject("body");
-                jsonWriter.WriteString("contentType", "Text");
-                jsonWriter.WriteString("content", message);
-                jsonWriter.WriteEndObject(); // body
-
-                jsonWriter.WriteStartArray("toRecipients");
-                jsonWriter.WriteStartObject();
-                jsonWriter.WriteStartObject("emailAddress");
-                jsonWriter.WriteString("address", to);
-                jsonWriter.WriteEndObject(); // emailAddress
-                jsonWriter.WriteEndObject(); // toRecipient
-                jsonWriter.WriteEndArray();
-
-                jsonWriter.WriteEndObject(); // message
-                jsonWriter.WriteEndObject(); // root
-                jsonWriter.Flush();
+                message.Serialize(jsonWriter);
                 var jsonBytes = writer.WrittenMemory;
 
                 request.Content = RequestContent.Create(jsonBytes);
