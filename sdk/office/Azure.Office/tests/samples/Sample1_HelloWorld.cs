@@ -6,7 +6,7 @@ using System.Diagnostics;
 using Azure.Core.Testing;
 using NUnit.Framework;
 
-namespace Azure.Office.Samples
+namespace Azure.Graph.Samples
 {
     [LiveOnly]
     [NonParallelizable]

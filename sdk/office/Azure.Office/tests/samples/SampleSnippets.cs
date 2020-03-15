@@ -7,7 +7,7 @@ using Azure.Core.Testing;
 using Azure.Identity;
 using NUnit.Framework;
 
-namespace Azure.Office.Samples
+namespace Azure.Graph.Samples
 {
     /// <summary>
     /// Samples that are used in the associated README.md file.

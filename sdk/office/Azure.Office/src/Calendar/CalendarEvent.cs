@@ -8,7 +8,7 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 
-namespace Azure.Office.Calendar
+namespace Azure.Graph.Calendar
 {
     /// <summary>
     /// User

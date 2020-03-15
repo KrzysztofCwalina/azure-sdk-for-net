@@ -9,7 +9,7 @@ using System.Text.Json;
 
 // TODO: implement full schema: https://docs.microsoft.com/en-us/graph/api/resources/message?view=graph-rest-1.0
 
-namespace Azure.Office.Mail
+namespace Azure.Graph.Mail
 {
     /// <summary>
     /// E-mail message.

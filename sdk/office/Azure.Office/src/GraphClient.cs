@@ -4,21 +4,20 @@
 using Azure.Core;
 using Azure.Core.Pipeline;
 using Azure.Identity;
-using Azure.Office.Calendar;
-using Azure.Office.Mail;
-using Azure.Office.Users;
+using Azure.Graph.Calendar;
+using Azure.Graph.Mail;
+using Azure.Graph.Users;
 using System;
 using System.ComponentModel;
 using System.Threading;
 
-namespace Azure.Office
+namespace Azure.Graph
 {
     /// <summary>
     /// Microsoft Graph Client
     /// </summary>
-    public class OfficeClient
+    public class GraphClient
     {
-        private readonly DefaultAzureCredential _credential;
         private readonly HttpPipeline _pipeline;
         private readonly ClientDiagnostics _clientDiagnostics;
 
@@ -26,7 +25,7 @@ namespace Azure.Office
         /// Creates MailClient.
         /// </summary>
         /// <param name="username">Graph user</param>
-        public OfficeClient(string username) : this(username, new OfficeClientOptions())
+        public GraphClient(string username) : this(username, new GraphClientOptions())
         {
         }
 
@@ -35,31 +34,39 @@ namespace Azure.Office
         /// </summary>
         /// <param name="username">Graph user</param>
         /// <param name="options">Client options</param>
-        public OfficeClient(string username, OfficeClientOptions options)
+        public GraphClient(string username, GraphClientOptions options)
         {
             Argument.AssertNotNull(username, nameof(username));
             Argument.AssertNotNull(options, nameof(options));
 
+            _pipeline = CreatePipeline(username, options);
+            _clientDiagnostics = new ClientDiagnostics(options);
+        }
+
+        internal static HttpPipeline CreatePipeline(string username, GraphClientOptions options)
+        {
             var credentialOptions = new DefaultAzureCredentialOptions();
             credentialOptions.SharedTokenCacheUsername = username;
-            _credential = new DefaultAzureCredential(credentialOptions);
-            _pipeline = HttpPipelineBuilder.Build(options);
+            var credential = new DefaultAzureCredential(credentialOptions);
 
-            _clientDiagnostics = new ClientDiagnostics(options);
+            var policy = new BearerTokenAuthenticationPolicy(credential, "https://graph.microsoft.com/.default");
+            var pipeline = HttpPipelineBuilder.Build(options, policy);
+
+            return pipeline;
         }
 
         /// <summary>
         /// Constructor for mocking
         /// </summary>
-        protected OfficeClient() { }
+        protected GraphClient() { }
 
         /// <summary>
         /// Creates UserClient.
         /// </summary>
         /// <returns></returns>
-        public UserClient GetUserClient()
+        public GraphUserClient GetUserClient()
         {
-            return new UserClient(_pipeline, _credential, _clientDiagnostics);
+            return new GraphUserClient(_pipeline, _clientDiagnostics);
         }
 
         /// <summary>
@@ -68,7 +75,7 @@ namespace Azure.Office
         /// <returns></returns>
         public MailClient GetMailClient()
         {
-            return new MailClient(_pipeline, _credential, _clientDiagnostics);
+            return new MailClient(_pipeline, _clientDiagnostics);
         }
 
         /// <summary>
@@ -77,14 +84,7 @@ namespace Azure.Office
         /// <returns></returns>
         public CalendarClient GetCalendarClient()
         {
-            return new CalendarClient(_pipeline, _credential, _clientDiagnostics);
-        }
-
-        internal static void AddAuthHeader(DefaultAzureCredential credential, Request request, CancellationToken cancellationToken)
-        {
-            TokenRequestContext ctx = new TokenRequestContext(new string[] { "https://graph.microsoft.com/.default" });
-            AccessToken t = credential.GetToken(ctx, cancellationToken);
-            request.Headers.Add(HttpHeader.Names.Authorization, "Bearer " + t.Token);
+            return new CalendarClient(_pipeline, _clientDiagnostics);
         }
 
         #region nobody wants to see these

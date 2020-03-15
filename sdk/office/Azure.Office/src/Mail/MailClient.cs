@@ -6,17 +6,17 @@ using Azure.Core.Pipeline;
 using Azure.Identity;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Threading;
 
-namespace Azure.Office.Mail
+namespace Azure.Graph.Mail
 {
     /// <summary>
     /// Main type for e-mail.
     /// </summary>
     public class MailClient
     {
-        private readonly DefaultAzureCredential _credential;
         private readonly HttpPipeline _pipeline;
         private readonly ClientDiagnostics _clientDiagnostics;
 
@@ -24,7 +24,7 @@ namespace Azure.Office.Mail
         /// Creates MailClient.
         /// </summary>
         /// <param name="username">Graph user</param>
-        public MailClient(string username) : this(username, new OfficeClientOptions())
+        public MailClient(string username) : this(username, new GraphClientOptions())
         {
         }
 
@@ -33,22 +33,20 @@ namespace Azure.Office.Mail
         /// </summary>
         /// <param name="username">Graph user</param>
         /// <param name="options">Client options</param>
-        public MailClient(string username, OfficeClientOptions options)
+        public MailClient(string username, GraphClientOptions options)
         {
             Argument.AssertNotNull(username, nameof(username));
             Argument.AssertNotNull(options, nameof(options));
 
-            var credentialOptions = new DefaultAzureCredentialOptions();
-            credentialOptions.SharedTokenCacheUsername = username;
-            _credential = new DefaultAzureCredential(credentialOptions);
-            _pipeline = HttpPipelineBuilder.Build(options);
-
+            _pipeline = GraphClient.CreatePipeline(username, options);
             _clientDiagnostics = new ClientDiagnostics(options);
         }
 
-        internal MailClient(HttpPipeline pipeline, DefaultAzureCredential credential, ClientDiagnostics clientDiagnostics)
+        internal MailClient(HttpPipeline pipeline, ClientDiagnostics clientDiagnostics)
         {
-            _credential = credential;
+            Debug.Assert(pipeline != null);
+            Debug.Assert(clientDiagnostics != null);
+
             _pipeline = pipeline;
             _clientDiagnostics = clientDiagnostics;
         }
@@ -76,7 +74,6 @@ namespace Azure.Office.Mail
                 var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/me/sendMail");
                 request.Uri.Reset(new Uri(escaped));
                 request.Headers.Add(HttpHeader.Common.JsonContentType);
-                OfficeClient.AddAuthHeader(_credential, request, cancellationToken);
 
                 var writer = new Core.ArrayBufferWriter<byte>();
                 var jsonWriter = new Utf8JsonWriter(writer);
@@ -85,7 +82,7 @@ namespace Azure.Office.Mail
 
                 request.Content = RequestContent.Create(jsonBytes);
 
-                var response = _pipeline.SendRequest(request, CancellationToken.None);
+                var response = _pipeline.SendRequest(request, cancellationToken);
 
                 var json = JsonDocument.Parse(response.ContentStream);
                 var root = json.RootElement;

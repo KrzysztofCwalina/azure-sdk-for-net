@@ -8,12 +8,12 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 
-namespace Azure.Office.Users
+namespace Azure.Graph.Users
 {
     /// <summary>
     /// User
     /// </summary>
-    public class OfficeUser : IEquatable<OfficeUser>
+    public class GraphUser : IEquatable<GraphUser>
     {
         /// <summary>
         /// Office
@@ -82,7 +82,7 @@ namespace Azure.Office.Users
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public bool Equals(OfficeUser other) => this.Id.Equals(other.Id, StringComparison.Ordinal);
+        public bool Equals(GraphUser other) => this.Id.Equals(other.Id, StringComparison.Ordinal);
 
         /// <summary>
         /// Returns true if IDs are the same
@@ -92,7 +92,7 @@ namespace Azure.Office.Users
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override bool Equals(object obj)
         {
-            if (obj is OfficeUser) Equals((OfficeUser)obj);
+            if (obj is GraphUser) Equals((GraphUser)obj);
             return false;
         }
 
@@ -103,12 +103,12 @@ namespace Azure.Office.Users
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override int GetHashCode() => Id.GetHashCode();
 
-        internal static OfficeUser Deserialize(Stream content)
+        internal static GraphUser Deserialize(Stream content)
         {
             var json = JsonDocument.Parse(content);
             var root = json.RootElement;
 
-            var user = new OfficeUser();
+            var user = new GraphUser();
             user.Office = root.GetProperty("officeLocation").GetString();
             user.DisplayName = root.GetProperty("displayName").GetString();
             user.Title = root.GetProperty("jobTitle").GetString();

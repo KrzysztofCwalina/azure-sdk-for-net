@@ -1,28 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Azure.Office.Mail;
-using Azure.Office.Users;
+using Azure.Graph.Mail;
+using Azure.Graph.Users;
 using NUnit.Framework;
 
-namespace Azure.Office.Tests
+namespace Azure.Graph.Tests
 {
     public class UserTests
     {
-        private UserClient _client;
+        private GraphUserClient _client;
 
         private const string USER = "pmarcu@microsoft.com";
 
         [SetUp]
         public void Setup()
         {
-            _client = new UserClient("kcwalina@microsoft.com");
+            _client = new GraphUserClient("kcwalina@microsoft.com");
         }
 
         [Test]
         public void GetMe()
         {
-            OfficeUser user = _client.GetMe();
+            GraphUser user = _client.GetMe();
 
             Assert.AreEqual("Cwalina", user.Surname);
         }
@@ -30,7 +30,7 @@ namespace Azure.Office.Tests
         [Test]
         public void GetUser()
         {
-            OfficeUser user = _client.GetUser(USER);
+            GraphUser user = _client.GetUser(USER);
 
             Assert.AreEqual("Marcu", user.Surname);
         }

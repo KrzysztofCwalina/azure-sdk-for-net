@@ -3,12 +3,12 @@
 
 using Azure.Core;
 
-namespace Azure.Office
+namespace Azure.Graph
 {
     /// <summary>
     /// Options for MailClient
     /// </summary>
-    public class OfficeClientOptions : ClientOptions
+    public class GraphClientOptions : ClientOptions
     {
         /// <summary>
         /// The latest service version supported by this client library.
@@ -19,7 +19,7 @@ namespace Azure.Office
         /// Options for MailCVlient
         /// </summary>
         /// <param name="version"></param>
-        public OfficeClientOptions(ServiceVersion version = LatestVersion)
+        public GraphClientOptions(ServiceVersion version = LatestVersion)
         {
             Version = version;
         }

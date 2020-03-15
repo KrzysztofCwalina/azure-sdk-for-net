@@ -6,17 +6,17 @@ using Azure.Core.Pipeline;
 using Azure.Identity;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Threading;
 
-namespace Azure.Office.Calendar
+namespace Azure.Graph.Calendar
 {
     /// <summary>
     /// Main type for accessing calendar
     /// </summary>
     public class CalendarClient
     {
-        private readonly DefaultAzureCredential _credential;
         private readonly HttpPipeline _pipeline;
         private readonly ClientDiagnostics _clientDiagnostics;
 
@@ -24,7 +24,7 @@ namespace Azure.Office.Calendar
         /// Creates MailClient.
         /// </summary>
         /// <param name="username">Graph user</param>
-        public CalendarClient(string username) : this(username, new OfficeClientOptions())
+        public CalendarClient(string username) : this(username, new GraphClientOptions())
         {
         }
 
@@ -33,18 +33,28 @@ namespace Azure.Office.Calendar
         /// </summary>
         /// <param name="username">Graph user</param>
         /// <param name="options">Client options</param>
-        public CalendarClient(string username, OfficeClientOptions options)
+        public CalendarClient(string username, GraphClientOptions options)
         {
             Argument.AssertNotNull(username, nameof(username));
             Argument.AssertNotNull(options, nameof(options));
 
-            var credentialOptions = new DefaultAzureCredentialOptions();
-            credentialOptions.SharedTokenCacheUsername = username;
-            _credential = new DefaultAzureCredential(credentialOptions);
-            _pipeline = HttpPipelineBuilder.Build(options);
-
+            _pipeline = GraphClient.CreatePipeline(username, options);
             _clientDiagnostics = new ClientDiagnostics(options);
         }
+
+        internal CalendarClient(HttpPipeline pipeline, ClientDiagnostics clientDiagnostics)
+        {
+            Debug.Assert(pipeline != null);
+            Debug.Assert(clientDiagnostics != null);
+
+            _pipeline = pipeline;
+            _clientDiagnostics = clientDiagnostics;
+        }
+
+        /// <summary>
+        /// Constructor for mocking
+        /// </summary>
+        protected CalendarClient() { }
 
         /// <summary>
         /// Gets list of events.
@@ -62,9 +72,8 @@ namespace Azure.Office.Calendar
                 request.Method = RequestMethod.Get;
                 var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/me/events");
                 request.Uri.Reset(new Uri(escaped));
-                OfficeClient.AddAuthHeader(_credential, request, cancellationToken);
 
-                var response = _pipeline.SendRequest(request, CancellationToken.None);
+                var response = _pipeline.SendRequest(request, cancellationToken);
 
                 var json = JsonDocument.Parse(response.ContentStream);
                 var root = json.RootElement;
@@ -78,18 +87,6 @@ namespace Azure.Office.Calendar
                 throw;
             }
         }
-
-        internal CalendarClient(HttpPipeline pipeline, DefaultAzureCredential credential, ClientDiagnostics clientDiagnostics)
-        {
-            _credential = credential;
-            _pipeline = pipeline;
-            _clientDiagnostics = clientDiagnostics;
-        }
-
-        /// <summary>
-        /// Constructor for mocking
-        /// </summary>
-        protected CalendarClient() { }
 
         #region nobody wants to see these
         /// <summary>

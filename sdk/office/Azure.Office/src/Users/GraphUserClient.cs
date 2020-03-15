@@ -6,19 +6,18 @@ using Azure.Core.Pipeline;
 using Azure.Identity;
 using System;
 using System.ComponentModel;
-using System.IO;
+using System.Diagnostics;
 using System.Threading;
 
 // TODO: support OData queries: https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http#optional-query-parameters
 
-namespace Azure.Office.Users
+namespace Azure.Graph.Users
 {
     /// <summary>
     /// Main type for sending and receiving e-mail.
     /// </summary>
-    public class UserClient
+    public class GraphUserClient
     {
-        private readonly DefaultAzureCredential _credential;
         private readonly HttpPipeline _pipeline;
         private readonly ClientDiagnostics _clientDiagnostics;
 
@@ -26,7 +25,7 @@ namespace Azure.Office.Users
         /// Creates UserClient.
         /// </summary>
         /// <param name="username">Graph user</param>
-        public UserClient(string username) : this(username, new OfficeClientOptions())
+        public GraphUserClient(string username) : this(username, new GraphClientOptions())
         {
         }
 
@@ -35,22 +34,20 @@ namespace Azure.Office.Users
         /// </summary>
         /// <param name="username">Graph user</param>
         /// <param name="options">Client options</param>
-        public UserClient(string username, OfficeClientOptions options)
+        public GraphUserClient(string username, GraphClientOptions options)
         {
             Argument.AssertNotNull(username, nameof(username));
             Argument.AssertNotNull(options, nameof(options));
 
-            var credentialOptions = new DefaultAzureCredentialOptions();
-            credentialOptions.SharedTokenCacheUsername = username;
-            _credential = new DefaultAzureCredential(credentialOptions);
-            _pipeline = HttpPipelineBuilder.Build(options);
-
+            _pipeline = GraphClient.CreatePipeline(username, options);
             _clientDiagnostics = new ClientDiagnostics(options);
         }
 
-        internal UserClient(HttpPipeline pipeline, DefaultAzureCredential credential, ClientDiagnostics clientDiagnostics)
+        internal GraphUserClient(HttpPipeline pipeline, ClientDiagnostics clientDiagnostics)
         {
-            _credential = credential;
+            Debug.Assert(pipeline != null);
+            Debug.Assert(clientDiagnostics != null);
+
             _pipeline = pipeline;
             _clientDiagnostics = clientDiagnostics;
         }
@@ -58,7 +55,7 @@ namespace Azure.Office.Users
         /// <summary>
         /// Constructor for mocking
         /// </summary>
-        protected UserClient()
+        protected GraphUserClient()
         { }
 
         /// <summary>
@@ -66,9 +63,9 @@ namespace Azure.Office.Users
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Response<OfficeUser> GetMe(CancellationToken cancellationToken = default)
+        public Response<GraphUser> GetMe(CancellationToken cancellationToken = default)
         {
-            using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(UserClient)}.{nameof(GetMe)}");
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(GraphUserClient)}.{nameof(GetMe)}");
             scope.Start();
 
             try
@@ -77,14 +74,14 @@ namespace Azure.Office.Users
                 request.Method = RequestMethod.Get;
                 var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/me/");
                 request.Uri.Reset(new Uri(escaped));
-                OfficeClient.AddAuthHeader(_credential, request, cancellationToken);
+                //GraphClient.AddAuthHeader(_credential, request, cancellationToken);
 
                 var response = _pipeline.SendRequest(request, cancellationToken);
 
                 switch (response.Status)
                 {
                     case 200:
-                        OfficeUser user = OfficeUser.Deserialize(response.ContentStream);
+                        GraphUser user = GraphUser.Deserialize(response.ContentStream);
                         return Response.FromValue(user, response);
                     default:
                         throw _clientDiagnostics.CreateRequestFailedException(response);
@@ -103,9 +100,9 @@ namespace Azure.Office.Users
         /// <param name="cancellationToken"></param>
         /// <param name="principalOrId">User principal name or use ID</param>
         /// <returns></returns>
-        public Response<OfficeUser> GetUser(string principalOrId, CancellationToken cancellationToken = default)
+        public Response<GraphUser> GetUser(string principalOrId, CancellationToken cancellationToken = default)
         {
-            using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(UserClient)}.{nameof(GetUser)}");
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(GraphUserClient)}.{nameof(GetUser)}");
             scope.Start();
 
             try
@@ -115,14 +112,13 @@ namespace Azure.Office.Users
                 var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/users/");
                 request.Uri.Reset(new Uri(escaped));
                 request.Uri.AppendPath(principalOrId, escape: true);
-                OfficeClient.AddAuthHeader(_credential, request, cancellationToken);
 
                 var response = _pipeline.SendRequest(request, cancellationToken);
 
                 switch (response.Status)
                 {
                     case 200:
-                        OfficeUser user = OfficeUser.Deserialize(response.ContentStream);
+                        GraphUser user = GraphUser.Deserialize(response.ContentStream);
                         return Response.FromValue(user, response);
                     default:
                         throw _clientDiagnostics.CreateRequestFailedException(response);
@@ -143,7 +139,7 @@ namespace Azure.Office.Users
         /// <returns></returns>
         public Response GetPhoto(CancellationToken cancellationToken = default)
         {
-            using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(UserClient)}.{nameof(GetPhoto)}");
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(GraphUserClient)}.{nameof(GetPhoto)}");
             scope.Start();
 
             try
@@ -152,7 +148,6 @@ namespace Azure.Office.Users
                 request.Method = RequestMethod.Get;
                 var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/me/photo/$value");
                 request.Uri.Reset(new Uri(escaped));
-                OfficeClient.AddAuthHeader(_credential, request, cancellationToken);
 
                 var response = _pipeline.SendRequest(request, cancellationToken);
 
@@ -179,7 +174,7 @@ namespace Azure.Office.Users
         /// <returns></returns>
         public Response GetPhoto(string principalOrId, CancellationToken cancellationToken = default)
         {
-            using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(UserClient)}.{nameof(GetPhoto)}");
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(GraphUserClient)}.{nameof(GetPhoto)}");
             scope.Start();
 
             try
@@ -191,8 +186,6 @@ namespace Azure.Office.Users
                 request.Uri.Reset(new Uri(escaped));
                 request.Uri.AppendPath(principalOrId, escape: true);
                 request.Uri.AppendPath("/photo/$value");
-
-                OfficeClient.AddAuthHeader(_credential, request, cancellationToken);
 
                 var response = _pipeline.SendRequest(request, cancellationToken);
 

@@ -1,21 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Azure.Office.Calendar;
-using Azure.Office.Mail;
-using Azure.Office.Users;
+using Azure.Graph.Calendar;
+using Azure.Graph.Mail;
+using Azure.Graph.Users;
 using NUnit.Framework;
 
-namespace Azure.Office.Tests
+namespace Azure.Graph.Tests
 {
     public class OfficeTests
     {
-        private OfficeClient _client;
+        private GraphClient _client;
 
         [SetUp]
         public void Setup()
         {
-            _client = new OfficeClient("kcwalina@microsoft.com");
+            _client = new GraphClient("kcwalina@microsoft.com");
         }
 
         [Test]
@@ -24,7 +24,7 @@ namespace Azure.Office.Tests
             MailClient mail = _client.GetMailClient();
             Assert.IsNotNull(mail);
 
-            UserClient user = _client.GetUserClient();
+            GraphUserClient user = _client.GetUserClient();
             Assert.IsNotNull(user);
 
             CalendarClient calendar = _client.GetCalendarClient();

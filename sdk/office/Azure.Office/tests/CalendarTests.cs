@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Azure.Office.Calendar;
+using Azure.Graph.Calendar;
 using NUnit.Framework;
 
-namespace Azure.Office.Tests
+namespace Azure.Graph.Tests
 {
     public class CalendarTests
     {
