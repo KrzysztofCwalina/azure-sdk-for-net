@@ -75,11 +75,15 @@ namespace Azure.Graph.Calendar
 
                 var response = _pipeline.SendRequest(request, cancellationToken);
 
-                var json = JsonDocument.Parse(response.ContentStream);
-                var root = json.RootElement;
-
-                throw new NotImplementedException(); // TODO: implement
-                //return response;
+                switch (response.Status)
+                {
+                    case 200:
+                        var json = JsonDocument.Parse(response.ContentStream);
+                        var root = json.RootElement;
+                        return null;
+                    default:
+                        throw _clientDiagnostics.CreateRequestFailedException(response);
+                }
             }
             catch (Exception e)
             {

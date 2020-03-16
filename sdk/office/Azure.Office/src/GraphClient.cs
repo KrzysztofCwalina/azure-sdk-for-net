@@ -47,9 +47,10 @@ namespace Azure.Graph
         {
             var credentialOptions = new DefaultAzureCredentialOptions();
             credentialOptions.SharedTokenCacheUsername = username;
-            var credential = new DefaultAzureCredential(credentialOptions);
+            //var credential = new DefaultAzureCredential(credentialOptions);
+            var credential = new InteractiveBrowserCredential();
 
-            var policy = new BearerTokenAuthenticationPolicy(credential, "https://graph.microsoft.com/.default");
+            var policy = new BearerTokenAuthenticationPolicy(credential, "https://graph.microsoft.com/calendars.read");
             var pipeline = HttpPipelineBuilder.Build(options, policy);
 
             return pipeline;

@@ -74,7 +74,6 @@ namespace Azure.Graph.Users
                 request.Method = RequestMethod.Get;
                 var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/me/");
                 request.Uri.Reset(new Uri(escaped));
-                //GraphClient.AddAuthHeader(_credential, request, cancellationToken);
 
                 var response = _pipeline.SendRequest(request, cancellationToken);
 

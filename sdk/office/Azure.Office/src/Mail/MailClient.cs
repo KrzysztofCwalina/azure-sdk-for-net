@@ -84,10 +84,15 @@ namespace Azure.Graph.Mail
 
                 var response = _pipeline.SendRequest(request, cancellationToken);
 
-                var json = JsonDocument.Parse(response.ContentStream);
-                var root = json.RootElement;
-
-                return response;
+                switch (response.Status)
+                {
+                    case 200:
+                        var json = JsonDocument.Parse(response.ContentStream);
+                        var root = json.RootElement;
+                        return response;
+                    default:
+                        throw _clientDiagnostics.CreateRequestFailedException(response);
+                }
             }
             catch (Exception e)
             {
