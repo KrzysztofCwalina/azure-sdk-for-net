@@ -7,8 +7,10 @@ using Azure.Identity;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Azure.Graph.Calendar
 {
@@ -56,11 +58,14 @@ namespace Azure.Graph.Calendar
         /// </summary>
         protected CalendarClient() { }
 
+
         /// <summary>
         /// Gets list of events.
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "AZC0106:Non-public asynchronous method needs 'async' parameter.", Justification = "<Pending>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "AZC0102:Do not use GetAwaiter().GetResult().", Justification = "<Pending>")]
         public Pageable<CalendarEvent> GetEvents(CancellationToken cancellationToken = default)
         {
             using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(CalendarClient)}.{nameof(GetEvents)}");
@@ -68,6 +73,8 @@ namespace Azure.Graph.Calendar
 
             try
             {
+                SentItems().GetAwaiter().GetResult();
+
                 using Request request = _pipeline.CreateRequest();
                 request.Method = RequestMethod.Get;
                 var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/me/events");
@@ -90,6 +97,25 @@ namespace Azure.Graph.Calendar
                 scope.Failed(e);
                 throw;
             }
+        }
+
+        private static async Task SentItems()
+        {
+            TokenRequestContext context = new TokenRequestContext(new string[] { "Mail.Read" });
+
+            DefaultAzureCredentialOptions options = new DefaultAzureCredentialOptions();
+            options.SharedTokenCacheUsername = "kcwalina@microsoft.com";
+            DefaultAzureCredential creds = new DefaultAzureCredential(options);
+
+            AccessToken token = await creds.GetTokenAsync(context).ConfigureAwait(false);
+
+            string t = token.Token;
+
+            HttpClient client = new HttpClient();
+
+            client.DefaultRequestHeaders.Add("Authorization", $"bearer {token.Token}");
+
+            var response = await client.GetAsync("https://graph.microsoft.com/v1.0/me/mailFolders('SentItems')/messages?$select=sender,subject").ConfigureAwait(false);
         }
 
         #region nobody wants to see these
