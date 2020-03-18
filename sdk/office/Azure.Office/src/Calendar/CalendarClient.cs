@@ -3,14 +3,12 @@
 
 using Azure.Core;
 using Azure.Core.Pipeline;
-using Azure.Identity;
+using Azure.Graph.Internal;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Azure.Graph.Calendar
 {
@@ -73,14 +71,16 @@ namespace Azure.Graph.Calendar
 
             try
             {
-                SentItems().GetAwaiter().GetResult();
+                using HttpMessage message = _pipeline.CreateMessage();
+                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermissions.CalendarsRead);
 
-                using Request request = _pipeline.CreateRequest();
+                var request = message.Request;
                 request.Method = RequestMethod.Get;
-                var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/me/events");
-                request.Uri.Reset(new Uri(escaped));
+                request.Uri.Reset(new Uri(@"https://graph.microsoft.com/v1.0/me/events"));
 
-                var response = _pipeline.SendRequest(request, cancellationToken);
+                _pipeline.Send(message, cancellationToken);
+
+                var response = message.Response;
 
                 switch (response.Status)
                 {
@@ -97,25 +97,6 @@ namespace Azure.Graph.Calendar
                 scope.Failed(e);
                 throw;
             }
-        }
-
-        private static async Task SentItems()
-        {
-            TokenRequestContext context = new TokenRequestContext(new string[] { "Mail.Read" });
-
-            DefaultAzureCredentialOptions options = new DefaultAzureCredentialOptions();
-            options.SharedTokenCacheUsername = "kcwalina@microsoft.com";
-            DefaultAzureCredential creds = new DefaultAzureCredential(options);
-
-            AccessToken token = await creds.GetTokenAsync(context).ConfigureAwait(false);
-
-            string t = token.Token;
-
-            HttpClient client = new HttpClient();
-
-            client.DefaultRequestHeaders.Add("Authorization", $"bearer {token.Token}");
-
-            var response = await client.GetAsync("https://graph.microsoft.com/v1.0/me/mailFolders('SentItems')/messages?$select=sender,subject").ConfigureAwait(false);
         }
 
         #region nobody wants to see these

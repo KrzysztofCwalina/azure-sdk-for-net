@@ -10,6 +10,7 @@ using Azure.Graph.Users;
 using System;
 using System.ComponentModel;
 using System.Threading;
+using Azure.Graph.Internal;
 
 namespace Azure.Graph
 {
@@ -47,10 +48,9 @@ namespace Azure.Graph
         {
             var credentialOptions = new DefaultAzureCredentialOptions();
             credentialOptions.SharedTokenCacheUsername = username;
-            //var credential = new DefaultAzureCredential(credentialOptions);
-            var credential = new InteractiveBrowserCredential();
+            var credential = new DefaultAzureCredential(credentialOptions);
 
-            var policy = new BearerTokenAuthenticationPolicy(credential, "https://graph.microsoft.com/calendars.read");
+            var policy = new GraphAuthenticationPolicy(credential);
             var pipeline = HttpPipelineBuilder.Build(options, policy);
 
             return pipeline;

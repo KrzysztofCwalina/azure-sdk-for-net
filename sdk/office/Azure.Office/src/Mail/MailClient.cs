@@ -3,6 +3,7 @@
 
 using Azure.Core;
 using Azure.Core.Pipeline;
+using Azure.Graph.Internal;
 using Azure.Identity;
 using System;
 using System.ComponentModel;
@@ -69,10 +70,12 @@ namespace Azure.Graph.Mail
 
             try
             {
-                using Request request = _pipeline.CreateRequest();
+                using HttpMessage httpMessage = _pipeline.CreateMessage();
+                GraphAuthenticationPolicy.RequestPermissions(httpMessage, GraphPermissions.MailSend);
+
+                var request = httpMessage.Request;
                 request.Method = RequestMethod.Post;
-                var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/me/sendMail");
-                request.Uri.Reset(new Uri(escaped));
+                request.Uri.Reset(new Uri(@"https://graph.microsoft.com/v1.0/me/sendMail"));
                 request.Headers.Add(HttpHeader.Common.JsonContentType);
 
                 var writer = new Core.ArrayBufferWriter<byte>();
@@ -82,7 +85,8 @@ namespace Azure.Graph.Mail
 
                 request.Content = RequestContent.Create(jsonBytes);
 
-                var response = _pipeline.SendRequest(request, cancellationToken);
+                _pipeline.Send(httpMessage, cancellationToken);
+                var response = httpMessage.Response;
 
                 switch (response.Status)
                 {

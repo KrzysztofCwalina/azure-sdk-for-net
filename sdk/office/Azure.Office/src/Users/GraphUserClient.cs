@@ -3,7 +3,7 @@
 
 using Azure.Core;
 using Azure.Core.Pipeline;
-using Azure.Identity;
+using Azure.Graph.Internal;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -70,13 +70,16 @@ namespace Azure.Graph.Users
 
             try
             {
-                using Request request = _pipeline.CreateRequest();
+                using HttpMessage message = _pipeline.CreateMessage();
+                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermissions.UserRead);
+
+                var request = message.Request;
                 request.Method = RequestMethod.Get;
-                var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/me/");
-                request.Uri.Reset(new Uri(escaped));
+                request.Uri.Reset(new Uri(@"https://graph.microsoft.com/v1.0/me/"));
 
-                var response = _pipeline.SendRequest(request, cancellationToken);
+                _pipeline.Send(message, cancellationToken);
 
+                var response = message.Response;
                 switch (response.Status)
                 {
                     case 200:
@@ -106,13 +109,17 @@ namespace Azure.Graph.Users
 
             try
             {
-                using Request request = _pipeline.CreateRequest();
+                using HttpMessage message = _pipeline.CreateMessage();
+                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermissions.UserReadAll);
+
+                var request = message.Request;
                 request.Method = RequestMethod.Get;
-                var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/users/");
-                request.Uri.Reset(new Uri(escaped));
+                request.Uri.Reset(new Uri(@"https://graph.microsoft.com/v1.0/users/"));
                 request.Uri.AppendPath(principalOrId, escape: true);
 
-                var response = _pipeline.SendRequest(request, cancellationToken);
+                _pipeline.Send(message, cancellationToken);
+
+                var response = message.Response;
 
                 switch (response.Status)
                 {
@@ -143,12 +150,16 @@ namespace Azure.Graph.Users
 
             try
             {
-                using Request request = _pipeline.CreateRequest();
-                request.Method = RequestMethod.Get;
-                var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/me/photo/$value");
-                request.Uri.Reset(new Uri(escaped));
+                using HttpMessage message = _pipeline.CreateMessage();
+                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermissions.UserRead);
 
-                var response = _pipeline.SendRequest(request, cancellationToken);
+                var request = message.Request;
+                request.Method = RequestMethod.Get;
+                request.Uri.Reset(new Uri(@"https://graph.microsoft.com/v1.0/me/photo/$value"));
+
+                _pipeline.Send(message, cancellationToken);
+
+                var response = message.Response;
 
                 switch (response.Status)
                 {
@@ -178,15 +189,18 @@ namespace Azure.Graph.Users
 
             try
             {
-                using Request request = _pipeline.CreateRequest();
-                request.Method = RequestMethod.Get;
+                using HttpMessage message = _pipeline.CreateMessage();
+                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermissions.UserReadAll);
 
-                var escaped = Uri.EscapeUriString(@"https://graph.microsoft.com/v1.0/users/");
-                request.Uri.Reset(new Uri(escaped));
+                var request = message.Request;
+                request.Method = RequestMethod.Get;
+                request.Uri.Reset(new Uri(@"https://graph.microsoft.com/v1.0/users/"));
                 request.Uri.AppendPath(principalOrId, escape: true);
                 request.Uri.AppendPath("/photo/$value");
 
-                var response = _pipeline.SendRequest(request, cancellationToken);
+                _pipeline.Send(message, cancellationToken);
+
+                var response = message.Response;
 
                 switch (response.Status)
                 {
