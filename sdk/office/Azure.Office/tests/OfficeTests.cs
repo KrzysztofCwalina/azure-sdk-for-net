@@ -8,14 +8,15 @@ using NUnit.Framework;
 
 namespace Azure.Graph.Tests
 {
-    public class OfficeTests
+    public class OfficeTests : GraphTestsBase
     {
         private GraphClient _client;
 
         [SetUp]
         public void Setup()
         {
-            _client = new GraphClient("kcwalina@microsoft.com");
+            var credential = CreateCredential();
+            _client = new GraphClient(credential);
         }
 
         [Test]

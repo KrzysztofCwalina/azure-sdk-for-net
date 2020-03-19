@@ -24,22 +24,22 @@ namespace Azure.Graph.Users
         /// <summary>
         /// Creates UserClient.
         /// </summary>
-        /// <param name="username">Graph user</param>
-        public GraphUserClient(string username) : this(username, new GraphClientOptions())
+        /// <param name="credential">credential</param>
+        public GraphUserClient(TokenCredential credential) : this(credential, new GraphClientOptions())
         {
         }
 
         /// <summary>
         /// Creates UserClient.
         /// </summary>
-        /// <param name="username">Graph user</param>
+        /// <param name="credential">credential</param>
         /// <param name="options">Client options</param>
-        public GraphUserClient(string username, GraphClientOptions options)
+        public GraphUserClient(TokenCredential credential, GraphClientOptions options)
         {
-            Argument.AssertNotNull(username, nameof(username));
+            Argument.AssertNotNull(credential, nameof(credential));
             Argument.AssertNotNull(options, nameof(options));
 
-            _pipeline = GraphClient.CreatePipeline(username, options);
+            _pipeline = GraphClient.CreatePipeline(credential, options);
             _clientDiagnostics = new ClientDiagnostics(options);
         }
 

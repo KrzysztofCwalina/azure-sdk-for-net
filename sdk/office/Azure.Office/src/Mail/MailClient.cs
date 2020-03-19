@@ -4,7 +4,6 @@
 using Azure.Core;
 using Azure.Core.Pipeline;
 using Azure.Graph.Internal;
-using Azure.Identity;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -24,22 +23,22 @@ namespace Azure.Graph.Mail
         /// <summary>
         /// Creates MailClient.
         /// </summary>
-        /// <param name="username">Graph user</param>
-        public MailClient(string username) : this(username, new GraphClientOptions())
+        /// <param name="credential">credential</param>
+        public MailClient(TokenCredential credential) : this(credential, new GraphClientOptions())
         {
         }
 
         /// <summary>
         /// Creates MailClient.
         /// </summary>
-        /// <param name="username">Graph user</param>
+        /// <param name="credential">credential</param>
         /// <param name="options">Client options</param>
-        public MailClient(string username, GraphClientOptions options)
+        public MailClient(TokenCredential credential, GraphClientOptions options)
         {
-            Argument.AssertNotNull(username, nameof(username));
+            Argument.AssertNotNull(credential, nameof(credential));
             Argument.AssertNotNull(options, nameof(options));
 
-            _pipeline = GraphClient.CreatePipeline(username, options);
+            _pipeline = GraphClient.CreatePipeline(credential, options);
             _clientDiagnostics = new ClientDiagnostics(options);
         }
 

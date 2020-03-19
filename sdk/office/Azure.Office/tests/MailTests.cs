@@ -6,14 +6,15 @@ using NUnit.Framework;
 
 namespace Azure.Graph.Tests
 {
-    public class MailTests
+    public class MailTests : GraphTestsBase
     {
         private MailClient _client;
 
         [SetUp]
         public void Setup()
         {
-            _client = new MailClient("kcwalina@microsoft.com");
+            var credential = CreateCredential();
+            _client = new MailClient(credential);
         }
 
         [Test]

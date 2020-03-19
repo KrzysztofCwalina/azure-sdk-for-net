@@ -7,24 +7,24 @@ using NUnit.Framework;
 
 namespace Azure.Graph.Tests
 {
-    public class UserTests
+    public class UserTests : GraphTestsBase
     {
         private GraphUserClient _client;
 
-        private const string USER = "pmarcu@microsoft.com";
+        private const string USER = "DiegoS@M365x214355.onmicrosoft.com";
 
         [SetUp]
         public void Setup()
         {
-            _client = new GraphUserClient("kcwalina@microsoft.com");
+            var credential = CreateCredential();
+            _client = new GraphUserClient(credential);
         }
 
         [Test]
         public void GetMe()
         {
             GraphUser user = _client.GetMe();
-
-            Assert.AreEqual("Cwalina", user.Surname);
+            Assert.NotNull(user.Surname);
         }
 
         [Test]
@@ -32,14 +32,13 @@ namespace Azure.Graph.Tests
         {
             GraphUser user = _client.GetUser(USER);
 
-            Assert.AreEqual("Marcu", user.Surname);
+            Assert.AreEqual("Siciliani", user.Surname);
         }
 
         [Test]
         public void GetPhotoMe()
         {
             using Response photo = _client.GetPhoto();
-
             Assert.AreEqual("image/jpeg", photo.Headers.ContentType);
         }
 

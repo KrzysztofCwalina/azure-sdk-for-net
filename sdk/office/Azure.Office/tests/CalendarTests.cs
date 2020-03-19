@@ -2,18 +2,20 @@
 // Licensed under the MIT License.
 
 using Azure.Graph.Calendar;
+using Azure.Identity;
 using NUnit.Framework;
 
 namespace Azure.Graph.Tests
 {
-    public class CalendarTests
+    public class CalendarTests : GraphTestsBase
     {
         private CalendarClient _client;
 
         [SetUp]
         public void Setup()
         {
-            _client = new CalendarClient("kcwalina@microsoft.com");
+            var credential = CreateCredential();
+            _client = new CalendarClient(credential);
         }
 
         [Test]

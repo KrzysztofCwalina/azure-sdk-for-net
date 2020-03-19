@@ -23,22 +23,22 @@ namespace Azure.Graph.Calendar
         /// <summary>
         /// Creates MailClient.
         /// </summary>
-        /// <param name="username">Graph user</param>
-        public CalendarClient(string username) : this(username, new GraphClientOptions())
+        /// <param name="credential">credential</param>
+        public CalendarClient(TokenCredential credential) : this(credential, new GraphClientOptions())
         {
         }
 
         /// <summary>
         /// Creates MailClient.
         /// </summary>
-        /// <param name="username">Graph user</param>
+        /// <param name="credential">credential</param>
         /// <param name="options">Client options</param>
-        public CalendarClient(string username, GraphClientOptions options)
+        public CalendarClient(TokenCredential credential, GraphClientOptions options)
         {
-            Argument.AssertNotNull(username, nameof(username));
+            Argument.AssertNotNull(credential, nameof(credential));
             Argument.AssertNotNull(options, nameof(options));
 
-            _pipeline = GraphClient.CreatePipeline(username, options);
+            _pipeline = GraphClient.CreatePipeline(credential, options);
             _clientDiagnostics = new ClientDiagnostics(options);
         }
 

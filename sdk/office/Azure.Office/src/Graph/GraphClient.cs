@@ -3,13 +3,11 @@
 
 using Azure.Core;
 using Azure.Core.Pipeline;
-using Azure.Identity;
 using Azure.Graph.Calendar;
 using Azure.Graph.Mail;
 using Azure.Graph.Users;
 using System;
 using System.ComponentModel;
-using System.Threading;
 using Azure.Graph.Internal;
 
 namespace Azure.Graph
@@ -25,31 +23,27 @@ namespace Azure.Graph
         /// <summary>
         /// Creates MailClient.
         /// </summary>
-        /// <param name="username">Graph user</param>
-        public GraphClient(string username) : this(username, new GraphClientOptions())
+        /// <param name="credential"></param>
+        public GraphClient(TokenCredential credential) : this(credential, new GraphClientOptions())
         {
         }
 
         /// <summary>
         /// Creates MailClient.
         /// </summary>
-        /// <param name="username">Graph user</param>
+        /// <param name="credential">credential</param>
         /// <param name="options">Client options</param>
-        public GraphClient(string username, GraphClientOptions options)
+        public GraphClient(TokenCredential credential, GraphClientOptions options)
         {
-            Argument.AssertNotNull(username, nameof(username));
+            Argument.AssertNotNull(credential, nameof(credential));
             Argument.AssertNotNull(options, nameof(options));
 
-            _pipeline = CreatePipeline(username, options);
+            _pipeline = CreatePipeline(credential, options);
             _clientDiagnostics = new ClientDiagnostics(options);
         }
 
-        internal static HttpPipeline CreatePipeline(string username, GraphClientOptions options)
+        internal static HttpPipeline CreatePipeline(TokenCredential credential, GraphClientOptions options)
         {
-            var credentialOptions = new DefaultAzureCredentialOptions();
-            credentialOptions.SharedTokenCacheUsername = username;
-            var credential = new DefaultAzureCredential(credentialOptions);
-
             var policy = new GraphAuthenticationPolicy(credential);
             var pipeline = HttpPipelineBuilder.Build(options, policy);
 
