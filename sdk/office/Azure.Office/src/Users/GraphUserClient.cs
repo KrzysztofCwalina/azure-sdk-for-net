@@ -5,8 +5,10 @@ using Azure.Core;
 using Azure.Core.Pipeline;
 using Azure.Graph.Internal;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Text.Json;
 using System.Threading;
 
 // TODO: support OData queries: https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http#optional-query-parameters
@@ -126,6 +128,54 @@ namespace Azure.Graph.Users
                     case 200:
                         GraphUser user = GraphUser.Deserialize(response.ContentStream);
                         return Response.FromValue(user, response);
+                    default:
+                        throw _clientDiagnostics.CreateRequestFailedException(response);
+                }
+
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Gets information about current graph user
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Response<GraphUser[]> GetUsers(CancellationToken cancellationToken = default)
+        {
+            using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(GraphUserClient)}.{nameof(GetUser)}");
+            scope.Start();
+
+            try
+            {
+                using HttpMessage message = _pipeline.CreateMessage();
+                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermissions.UserReadAll);
+
+                var request = message.Request;
+                request.Method = RequestMethod.Get;
+                request.Uri.Reset(new Uri(@"https://graph.microsoft.com/v1.0/users/"));
+
+                _pipeline.Send(message, cancellationToken);
+
+                var response = message.Response;
+
+                switch (response.Status)
+                {
+                    case 200:
+                        var json = JsonDocument.Parse(response.ContentStream);
+                        var root = json.RootElement;
+                        var array = root.GetProperty("value");
+                        List<GraphUser> users = new List<GraphUser>();
+                        foreach (var userElement in array.EnumerateArray())
+                        {
+                            var user = GraphUser.Deserialize(userElement);
+                            users.Add(user);
+                        }
+                        return Response.FromValue(users.ToArray(), response);
                     default:
                         throw _clientDiagnostics.CreateRequestFailedException(response);
                 }

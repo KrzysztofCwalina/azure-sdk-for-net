@@ -107,21 +107,25 @@ namespace Azure.Graph.Users
         {
             var json = JsonDocument.Parse(content);
             var root = json.RootElement;
+            return Deserialize(root);
+        }
 
+        internal static GraphUser Deserialize(JsonElement element)
+        {
             var user = new GraphUser();
-            user.Office = root.GetProperty("officeLocation").GetString();
-            user.DisplayName = root.GetProperty("displayName").GetString();
-            user.Title = root.GetProperty("jobTitle").GetString();
-            user.GivenName = root.GetProperty("givenName").GetString();
-            user.Surname = root.GetProperty("surname").GetString();
-            user.Mail = root.GetProperty("mail").GetString();
+            user.Office = element.GetProperty("officeLocation").GetString();
+            user.DisplayName = element.GetProperty("displayName").GetString();
+            user.Title = element.GetProperty("jobTitle").GetString();
+            user.GivenName = element.GetProperty("givenName").GetString();
+            user.Surname = element.GetProperty("surname").GetString();
+            user.Mail = element.GetProperty("mail").GetString();
 
-            user.MobilePhone = root.GetProperty("mobilePhone").GetString();
-            user.PreferredLanguage = root.GetProperty("preferredLanguage").GetString();
-            user.Principal = root.GetProperty("userPrincipalName").GetString();
-            user.Id = root.GetProperty("id").GetString();
+            user.MobilePhone = element.GetProperty("mobilePhone").GetString();
+            user.PreferredLanguage = element.GetProperty("preferredLanguage").GetString();
+            user.Principal = element.GetProperty("userPrincipalName").GetString();
+            user.Id = element.GetProperty("id").GetString();
 
-            var businessPhones = root.GetProperty("businessPhones");
+            var businessPhones = element.GetProperty("businessPhones");
             foreach (var phone in businessPhones.EnumerateArray())
             {
                 var bp = phone.GetString();

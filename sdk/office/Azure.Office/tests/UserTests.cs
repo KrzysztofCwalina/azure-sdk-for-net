@@ -11,8 +11,7 @@ namespace Azure.Graph.Tests
     {
         private GraphUserClient _client;
 
-        private const string USER = "MiriamG@M365x214355.onmicrosoft.com";
-        private const string USER2 = "08fa38e4-cbfa-4488-94ed-c834da6539df";
+        private const string USER = "MiriamG@M365x955187.OnMicrosoft.com";
 
         [SetUp]
         public void Setup()
@@ -31,9 +30,15 @@ namespace Azure.Graph.Tests
         [Test]
         public void GetUser()
         {
-            GraphUser user = _client.GetUser(USER2);
+            GraphUser user = _client.GetUser(USER);
 
             Assert.AreEqual("Graham", user.Surname);
+        }
+
+        [Test]
+        public void GetUsers()
+        {
+            GraphUser[] user = _client.GetUsers();
         }
 
         [Test]
