@@ -61,10 +61,16 @@ namespace Azure.Graph.Calendar
         {
             var json = JsonDocument.Parse(content);
             var root = json.RootElement;
+            var calendarEvent = Deserialize(root);
+            return calendarEvent;
+        }
 
-            var user = new CalendarEvent();
-
-            throw new NotImplementedException(); // TODO: implement
+        internal static CalendarEvent Deserialize(JsonElement element)
+        {
+            var calendarEvent = new CalendarEvent();
+            calendarEvent.Id = element.GetProperty("id").GetString();
+            calendarEvent.Subject = element.GetProperty("subject").GetString();
+            return calendarEvent;
         }
     }
 }

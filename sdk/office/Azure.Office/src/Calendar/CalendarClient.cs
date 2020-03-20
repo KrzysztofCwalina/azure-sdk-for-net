@@ -5,6 +5,7 @@ using Azure.Core;
 using Azure.Core.Pipeline;
 using Azure.Graph.Internal;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.Json;
@@ -64,7 +65,7 @@ namespace Azure.Graph.Calendar
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "AZC0106:Non-public asynchronous method needs 'async' parameter.", Justification = "<Pending>")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "AZC0102:Do not use GetAwaiter().GetResult().", Justification = "<Pending>")]
-        public Pageable<CalendarEvent> GetEvents(CancellationToken cancellationToken = default)
+        public Response<CalendarEvent[]> GetEvents(CancellationToken cancellationToken = default)
         {
             using DiagnosticScope scope = _clientDiagnostics.CreateScope($"{nameof(CalendarClient)}.{nameof(GetEvents)}");
             scope.Start();
@@ -87,7 +88,14 @@ namespace Azure.Graph.Calendar
                     case 200:
                         var json = JsonDocument.Parse(response.ContentStream);
                         var root = json.RootElement;
-                        return null;
+                        var array = root.GetProperty("value");
+                        List<CalendarEvent> users = new List<CalendarEvent>();
+                        foreach (var userElement in array.EnumerateArray())
+                        {
+                            var user = CalendarEvent.Deserialize(userElement);
+                            users.Add(user);
+                        }
+                        return Response.FromValue(users.ToArray(), response);
                     default:
                         throw _clientDiagnostics.CreateRequestFailedException(response);
                 }

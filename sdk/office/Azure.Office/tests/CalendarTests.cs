@@ -21,7 +21,7 @@ namespace Azure.Graph.Tests
         [Test]
         public void GetEvents()
         {
-            foreach (var calendarEvent in _client.GetEvents())
+            foreach (var calendarEvent in _client.GetEvents().Value)
             {
 
             }
