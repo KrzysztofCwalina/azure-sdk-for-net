@@ -2,13 +2,15 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Core.Pipeline;
 
 namespace Azure.Graph.Internal
 {
-    internal enum GraphPermissions : int
+    internal enum GraphPermission : int
     {
         CalendarsRead,
         MailSend,
@@ -26,6 +28,9 @@ namespace Azure.Graph.Internal
             "User.Read.All"
         };
 
+        // TODO: this is a bit of a hack
+        private static ConcurrentDictionary<string, AccessToken> s_cache = new ConcurrentDictionary<string, AccessToken>();
+
         private const string ScopesProperty = "GraphAuthenticationPolicy.Scopes";
 
         private TokenCredential _credential;
@@ -36,7 +41,7 @@ namespace Azure.Graph.Internal
             _credential = credential;
         }
 
-        public static void RequestPermissions(HttpMessage message, GraphPermissions permission)
+        public static void RequestPermissions(HttpMessage message, GraphPermission permission)
         {
             message.SetProperty(ScopesProperty, s_permissionStrings[(int)permission]);
         }
@@ -72,11 +77,23 @@ namespace Azure.Graph.Internal
                 throw new InvalidOperationException("HttpMessage GraphBearerTokenPolicy.Scopes property is not a string");
             }
 
-            var scopes = new string[] { "https://graph.microsoft.com/" + scope };
+            AccessToken token;
+            while (true)
+            {
+                if (!s_cache.TryGetValue(scope, out token))
+                {
+                    var scopes = new string[] { "https://graph.microsoft.com/" + scope };
+                    token = async ?
+                        await _credential.GetTokenAsync(new TokenRequestContext(scopes, message.Request.ClientRequestId), message.CancellationToken).ConfigureAwait(false) :
+                        _credential.GetToken(new TokenRequestContext(scopes, message.Request.ClientRequestId), message.CancellationToken);
 
-            AccessToken token = async ?
-                await _credential.GetTokenAsync(new TokenRequestContext(scopes, message.Request.ClientRequestId), message.CancellationToken).ConfigureAwait(false) :
-                _credential.GetToken(new TokenRequestContext(scopes, message.Request.ClientRequestId), message.CancellationToken);
+                    s_cache.TryAdd(scope, token);
+                }
+                if (token.ExpiresOn > DateTimeOffset.UtcNow)
+                {
+                    break;
+                }
+            }
 
             message.Request.Headers.Add(HttpHeader.Names.Authorization, "Bearer " + token.Token);
 

@@ -72,7 +72,7 @@ namespace Azure.Graph.Calendar
             try
             {
                 using HttpMessage message = _pipeline.CreateMessage();
-                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermissions.CalendarsRead);
+                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermission.CalendarsRead);
 
                 var request = message.Request;
                 request.Method = RequestMethod.Get;

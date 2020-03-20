@@ -73,7 +73,7 @@ namespace Azure.Graph.Users
             try
             {
                 using HttpMessage message = _pipeline.CreateMessage();
-                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermissions.UserRead);
+                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermission.UserRead);
 
                 var request = message.Request;
                 request.Method = RequestMethod.Get;
@@ -112,7 +112,7 @@ namespace Azure.Graph.Users
             try
             {
                 using HttpMessage message = _pipeline.CreateMessage();
-                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermissions.UserReadAll);
+                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermission.UserReadAll);
 
                 var request = message.Request;
                 request.Method = RequestMethod.Get;
@@ -153,7 +153,7 @@ namespace Azure.Graph.Users
             try
             {
                 using HttpMessage message = _pipeline.CreateMessage();
-                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermissions.UserReadAll);
+                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermission.UserReadAll);
 
                 var request = message.Request;
                 request.Method = RequestMethod.Get;
@@ -201,7 +201,7 @@ namespace Azure.Graph.Users
             try
             {
                 using HttpMessage message = _pipeline.CreateMessage();
-                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermissions.UserRead);
+                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermission.UserRead);
 
                 var request = message.Request;
                 request.Method = RequestMethod.Get;
@@ -240,7 +240,7 @@ namespace Azure.Graph.Users
             try
             {
                 using HttpMessage message = _pipeline.CreateMessage();
-                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermissions.UserReadAll);
+                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermission.UserReadAll);
 
                 var request = message.Request;
                 request.Method = RequestMethod.Get;

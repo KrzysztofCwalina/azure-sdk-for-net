@@ -70,7 +70,7 @@ namespace Azure.Graph.Mail
             try
             {
                 using HttpMessage httpMessage = _pipeline.CreateMessage();
-                GraphAuthenticationPolicy.RequestPermissions(httpMessage, GraphPermissions.MailSend);
+                GraphAuthenticationPolicy.RequestPermissions(httpMessage, GraphPermission.MailSend);
 
                 var request = httpMessage.Request;
                 request.Method = RequestMethod.Post;
