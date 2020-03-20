@@ -89,9 +89,7 @@ namespace Azure.Graph.Mail
 
                 switch (response.Status)
                 {
-                    case 200:
-                        var json = JsonDocument.Parse(response.ContentStream);
-                        var root = json.RootElement;
+                    case 202:
                         return response;
                     default:
                         throw _clientDiagnostics.CreateRequestFailedException(response);

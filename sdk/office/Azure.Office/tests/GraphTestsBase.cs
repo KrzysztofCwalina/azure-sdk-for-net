@@ -13,7 +13,6 @@ namespace Azure.Graph.Tests
     {
         public enum Mode
         {
-            Dcc,
             Dac,
             Ibc,
         }
@@ -31,17 +30,6 @@ namespace Azure.Graph.Tests
                 case Mode.Ibc:
                     var credential = new InteractiveBrowserCredential(tenantId, clientId);
                     return credential;
-
-                case Mode.Dcc:
-                    var tco = new TokenCredentialOptions();
-
-                    Func<DeviceCodeInfo, CancellationToken, Task> func = (dci, ct) =>
-                    {
-                        return Task.CompletedTask;
-                    };
-
-                    var dcc = new DeviceCodeCredential(func, tenantId, clientId, tco);
-                    return dcc;
 
                 case Mode.Dac:
                     var daco = new DefaultAzureCredentialOptions();
