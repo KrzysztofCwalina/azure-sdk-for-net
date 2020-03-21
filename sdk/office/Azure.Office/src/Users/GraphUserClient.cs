@@ -61,6 +61,11 @@ namespace Azure.Graph.Users
         { }
 
         /// <summary>
+        /// Pipeline.
+        /// </summary>
+        public HttpPipeline Pipeline => _pipeline;
+
+        /// <summary>
         /// Gets information about current graph user
         /// </summary>
         /// <param name="cancellationToken"></param>
@@ -111,27 +116,9 @@ namespace Azure.Graph.Users
 
             try
             {
-                using HttpMessage message = _pipeline.CreateMessage();
-                GraphAuthenticationPolicy.RequestPermissions(message, GraphPermission.UserReadAll);
-
-                var request = message.Request;
-                request.Method = RequestMethod.Get;
-                request.Uri.Reset(new Uri(@"https://graph.microsoft.com/v1.0/users/"));
-                request.Uri.AppendPath(principalOrId, escape: true);
-
-                _pipeline.Send(message, cancellationToken);
-
-                var response = message.Response;
-
-                switch (response.Status)
-                {
-                    case 200:
-                        GraphUser user = GraphUser.Deserialize(response.ContentStream);
-                        return Response.FromValue(user, response);
-                    default:
-                        throw _clientDiagnostics.CreateRequestFailedException(response);
-                }
-
+                PipelineRequest message = Pipeline.CreateGetUserRequest(principalOrId);
+                Response response = message.Send(cancellationToken);
+                return Response.FromValue(response.ToGraphUser(), response);
             }
             catch (Exception e)
             {

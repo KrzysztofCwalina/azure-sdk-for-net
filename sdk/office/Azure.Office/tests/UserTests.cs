@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Azure.Graph.Mail;
 using Azure.Graph.Users;
 using NUnit.Framework;
 
@@ -18,6 +17,17 @@ namespace Azure.Graph.Tests
         {
             var credential = CreateCredential();
             _client = new GraphUserClient(credential);
+        }
+
+        [Test]
+        public void GetUserLowLevel()
+        {
+            PipelineRequest request = _client.Pipeline.CreateGetUserRequest(USER);
+            request.Request.Headers.Add("x-hello", "Hello_World!");
+
+            Response response = request.Send();
+            GraphUser user = response.ToGraphUser();
+            Assert.NotNull(user.Surname);
         }
 
         [Test]
