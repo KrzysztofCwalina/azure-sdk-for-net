@@ -25,7 +25,7 @@ public class OpenAIModel : CloudMachineFeature
 
     private OpenAIFeature GetOrCreateOpenAI(CloudMachineInfrastructure cm)
     {
-        foreach (OpenAIFeature feature in cm.Features.FindAll<OpenAIFeature>())
+        foreach (OpenAIFeature feature in cm.FindFeatures<OpenAIFeature>())
         {
             return feature;
         }

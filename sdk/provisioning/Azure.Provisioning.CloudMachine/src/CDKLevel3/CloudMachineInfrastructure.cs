@@ -16,6 +16,25 @@ using Azure.Provisioning.CloudMachine;
 
 namespace Azure.CloudMachine;
 
+public class StorageAccountFeature : CloudMachineFeature
+{
+    public ManagedServiceIdentity Identity { get; set; } = default!;
+
+    protected override ProvisionableResource EmitCore(CloudMachineInfrastructure cm)
+    {
+        StorageAccount storage = new("cm_storage", StorageAccount.ResourceVersions.V2023_01_01)
+        {
+            Name = cm.Id,
+            Kind = StorageKind.StorageV2,
+            Sku = new StorageSku { Name = StorageSkuName.StandardLrs },
+            IsHnsEnabled = true,
+            AllowBlobPublicAccess = false,
+            Identity = Identity
+        };
+        return storage;
+    }
+}
+
 public class CloudMachineInfrastructure
 {
     internal const string SB_PRIVATE_TOPIC = "cm_servicebus_topic_private";
@@ -24,7 +43,7 @@ public class CloudMachineInfrastructure
 
     private Infrastructure _infrastructure = new Infrastructure("cm");
     private List<Provisionable> _resources = new();
-    public FeatureCollection Features { get; } = new();
+    internal FeatureCollection Features { get; } = new();
     internal List<Type> Endpoints { get; } = new();
 
     // storage
@@ -78,16 +97,15 @@ public class CloudMachineInfrastructure
             UserAssignedIdentities = { { BicepFunction.Interpolate($"{Identity.Id}").Compile().ToString(), new UserAssignedIdentityDetails() } }
         };
 
-        _storage =
-            new StorageAccount("cm_storage", StorageAccount.ResourceVersions.V2023_01_01)
-            {
-                Kind = StorageKind.StorageV2,
-                Sku = new StorageSku { Name = StorageSkuName.StandardLrs },
-                IsHnsEnabled = true,
-                AllowBlobPublicAccess = false
-            };
-        _storage.Identity = managedServiceIdentity;
-        _storage.Name = _cmid;
+        _storage = new("cm_storage", StorageAccount.ResourceVersions.V2023_01_01)
+        {
+            Name = _cmid,
+            Kind = StorageKind.StorageV2,
+            Sku = new StorageSku { Name = StorageSkuName.StandardLrs },
+            IsHnsEnabled = true,
+            AllowBlobPublicAccess = false,
+            Identity = managedServiceIdentity
+        };
 
         _blobs = new("cm_storage_blobs")
         {
@@ -283,4 +301,7 @@ public class CloudMachineInfrastructure
 
         return _infrastructure.Build(context);
     }
+
+    public IEnumerable<T> FindFeatures<T>() where T : CloudMachineFeature
+        => Features.FindAll<T>();
 }

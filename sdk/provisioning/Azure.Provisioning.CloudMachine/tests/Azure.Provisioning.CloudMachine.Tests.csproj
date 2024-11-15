@@ -7,4 +7,9 @@
     <ProjectReference Include="..\src\Azure.Provisioning.CloudMachine.csproj" />
     <ProjectReference Include="..\..\Azure.Provisioning.Deployment\src\Azure.Provisioning.Deployment.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="TestFiles\cm.bicep">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

@@ -7,10 +7,12 @@ using Azure.Provisioning.CloudMachine;
 
 namespace Azure.CloudMachine;
 
-public class FeatureCollection
+internal class FeatureCollection
 {
     private CloudMachineFeature[] _items = new CloudMachineFeature[4];
     private int _count;
+
+    internal FeatureCollection() { }
 
     public IEnumerable<T> FindAll<T>() where T: CloudMachineFeature
     {
