@@ -41,14 +41,14 @@ internal class FeatureCollection
         }
     }
 
-    internal void Emit(CloudMachineInfrastructure infrastructure)
+    internal void AddToInfrastructure(CloudMachineInfrastructure infrastructure)
     {
         int index = 0;
         while (true)
         {
             if (index >= _count) break;
             CloudMachineFeature feature = _items[index++];
-            feature.Emit(infrastructure);
+            feature.AddToInfrastructure(infrastructure);
         }
     }
 }

@@ -2,15 +2,15 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using Azure.Provisioning.CloudMachine;
 using Azure.Provisioning.CognitiveServices;
-using Azure.Provisioning.Primitives;
 
 namespace Azure.CloudMachine.OpenAI;
 
 public class OpenAIModel : CloudMachineFeature
 {
+    private List<OpenAIModel> dependsOn = new();
     public OpenAIModel(string model, string modelVersion, AIModelKind kind = AIModelKind.Chat) {
         Kind = kind;
         Model = model;
@@ -21,7 +21,11 @@ public class OpenAIModel : CloudMachineFeature
     public string ModelVersion { get; }
     private AIModelKind Kind { get; }
 
-    internal OpenAIFeature Account { get; set; } = default!;
+    internal OpenAIFeature? OpenAIFeature { get; set; }
+
+    // TODO: this should be generalized
+    public void DependsOn(OpenAIModel other)
+        => dependsOn.Add(other);
 
     private OpenAIFeature GetOrCreateOpenAI(CloudMachineInfrastructure cm)
     {
@@ -34,14 +38,19 @@ public class OpenAIModel : CloudMachineFeature
         return openAI;
     }
 
-    public override void AddTo(CloudMachineInfrastructure cm)
+    protected internal override void AddToCludMachine(CloudMachineInfrastructure cm)
     {
         OpenAIFeature openAI = GetOrCreateOpenAI(cm);
         openAI.AddModel(this);
     }
 
-    protected override ProvisionableResource EmitCore(CloudMachineInfrastructure cm)
+    protected internal override void AddToInfrastructure(CloudMachineInfrastructure cm)
     {
+        if (OpenAIFeature == null)
+        {
+            throw new InvalidOperationException("Cannot add model to infrastructure without adding to CloudMachine first");
+        }
+
         string name = Kind switch
         {
             AIModelKind.Chat => $"{cm.Id}_chat",
@@ -49,15 +58,10 @@ public class OpenAIModel : CloudMachineFeature
             _ => throw new NotImplementedException()
         };
 
-        Debug.Assert(Account != null);
-        var emitted = Account!.Emitted;
-        if (emitted == null)
-        {
-            Account.Emit(cm);
-        }
-        CognitiveServicesAccount parent = (CognitiveServicesAccount)Account!.Emitted;
+        CognitiveServicesAccount parent = OpenAIFeature.Account!;
 
-        CognitiveServicesAccountDeployment deployment = new($"openai_{name}", "2024-06-01-preview") {
+        CognitiveServicesAccountDeployment deployment = new($"openai_{name}", "2024-06-01-preview")
+        {
             Parent = parent,
             Name = name,
             Properties = new CognitiveServicesAccountDeploymentProperties()
@@ -78,9 +82,7 @@ public class OpenAIModel : CloudMachineFeature
             }
         };
 
-        cm.AddResource(deployment);
-
-        return deployment;
+        cm.Infrastructure.Add(deployment);
     }
 }
 
